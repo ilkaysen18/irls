@@ -1,1 +1,1 @@
-# [aiRLS](irls.com/aiRLS)
+# [aiRLS](irlstech.com/aiRLS)
