@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aiRLS — AI Learning Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --bg-main: #F4F2F8;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: linear-gradient(135deg, #EDE8F5 0%, #E3E0F3 50%, #DAD5F0 100%);
+  --bg-input: #FFFFFF;
+  --text-primary: #1A1335;
+  --text-secondary: #6B6385;
+  --text-muted: #9E97B3;
+  --accent: #6C5CE7;
+  --accent-hover: #5A4BD4;
+  --accent-light: rgba(108, 92, 231, 0.10);
+  --border: #E8E4F0;
+  --border-light: #F0ECF5;
+  --sidebar-width: 280px;
+  --card-bg-1: #E8E3F8;
+  --card-bg-2: #F0E8F8;
+  --card-icon-blue: #4A6CF7;
+  --card-icon-red: #E74C3C;
+  --card-icon-yellow: #F39C12;
+  --card-icon-pink: #E84393;
+  --card-icon-green: #27AE60;
+  --card-icon-teal: #00B894;
+  --rainbow: linear-gradient(135deg, #6C5CE7, #A29BFE, #74B9FF, #55EFC4, #FFEAA7, #FDCB6E, #E17055, #D63031, #6C5CE7);
+  --shadow-sm: 0 1px 3px rgba(26, 19, 53, 0.06);
+  --shadow-md: 0 4px 16px rgba(26, 19, 53, 0.08);
+  --shadow-lg: 0 8px 32px rgba(26, 19, 53, 0.12);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+}
+
+html.dark {
+  --bg-main: #13111C;
+  --bg-sidebar: #1A1726;
+  --bg-card: linear-gradient(135deg, #221E33 0%, #1E1A2E 50%, #252040 100%);
+  --bg-input: #1E1A2E;
+  --text-primary: #F0ECF8;
+  --text-secondary: #A09AB5;
+  --text-muted: #6B6385;
+  --accent: #8B7CF7;
+  --accent-hover: #9D90FF;
+  --accent-light: rgba(139, 124, 247, 0.12);
+  --border: #2A2540;
+  --border-light: #221E33;
+  --card-bg-1: #221E33;
+  --card-bg-2: #1E1A2E;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+/* ─── Layout ─── */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* ─── Sidebar ─── */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+  z-index: 100;
+  position: relative;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+
+.brand-name {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.sidebar-toggle {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.sidebar-toggle:hover { background: var(--accent-light); color: var(--accent); }
+
+.sidebar-content { flex: 1; overflow-y: auto; padding: 0 12px; }
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+}
+.new-chat-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.new-chat-btn:active { transform: translateY(0); }
+.new-chat-btn i { font-size: 13px; }
+
+.labs-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  margin-bottom: 16px;
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.labs-btn:hover { background: rgba(108, 92, 231, 0.18); }
+.labs-btn i { font-size: 14px; }
+
+/* Course Selector */
+.course-selector-wrapper {
+  padding: 2px;
+  border-radius: calc(var(--radius-md) + 2px);
+  background: var(--rainbow);
+  background-size: 400% 400%;
+  animation: rainbowShift 6s ease infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes rainbowShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.course-selector {
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.course-selector:hover { background: var(--accent-light); }
+
+.course-selector-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.course-selector-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.course-selector-value span {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-selector-value i {
+  color: var(--text-muted);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Section Labels */
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 8px 8px;
+  margin-top: 4px;
+}
+
+/* Chat History Items */
+.chat-history-list { list-style: none; }
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+.chat-item:hover { background: var(--accent-light); }
+.chat-item.active { background: var(--accent-light); }
+
+.chat-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.chat-item-icon i { font-size: 12px; color: var(--text-muted); }
+
+.chat-item-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.chat-item.active .chat-item-text { color: var(--accent); font-weight: 600; }
+
+/* Sidebar Footer */
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+  text-align: left;
+}
+.sidebar-footer-btn:hover { background: var(--accent-light); color: var(--accent); }
+.sidebar-footer-btn i { width: 18px; text-align: center; font-size: 14px; }
+
+/* ─── Main Content ─── */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-main);
+  min-height: 60px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+.mobile-menu-btn:hover { background: var(--accent-light); }
+
+.top-bar-course {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar-course-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.top-bar-course-icon i { color: var(--accent); font-size: 14px; }
+
+.top-bar-course-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.top-bar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ready-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #E8F8E8, #D4F0D4);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #27AE60;
+}
+html.dark .ready-badge {
+  background: linear-gradient(135deg, #1A2E1A, #1E331E);
+  color: #5DD47A;
+}
+.ready-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #27AE60;
+  animation: pulse 2s infinite;
+}
+html.dark .ready-badge::before { background: #5DD47A; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Scrollable body */
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 28px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Greeting */
+.greeting-section {
+  padding: 40px 0 28px;
+  animation: fadeUp 0.6s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.greeting-wave { font-size: 36px; margin-bottom: 8px; display: block; }
+
+.greeting-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 34px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.greeting-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* ─── Action Cards Carousel ─── */
+.cards-section {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.cards-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.cards-carousel-wrapper {
+  position: relative;
+}
+
+.cards-carousel {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px 12px;
+  scrollbar-width: none;
+}
+.cards-carousel::-webkit-scrollbar { display: none; }
+
+.action-card {
+  flex: 0 0 195px;
+  min-height: 175px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(108, 92, 231, 0.04));
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+}
+
+.card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.card-icon.blue { background: linear-gradient(135deg, #4A6CF7, #6C8CFF); }
+.card-icon.red { background: linear-gradient(135deg, #E74C3C, #FF6B6B); }
+.card-icon.yellow { background: linear-gradient(135deg, #F39C12, #FFBE47); }
+.card-icon.pink { background: linear-gradient(135deg, #E84393, #FF6FB5); }
+.card-icon.green { background: linear-gradient(135deg, #27AE60, #6DD490); }
+.card-icon.teal { background: linear-gradient(135deg, #00B894, #55EFC4); }
+.card-icon.purple { background: linear-gradient(135deg, #6C5CE7, #A29BFE); }
+
+.card-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.card-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  flex: 1;
+}
+
+/* Carousel Nav Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: var(--shadow-md);
+  transition: background 0.2s, color 0.2s, opacity 0.25s;
+  opacity: 0;
+  pointer-events: none;
+}
+.carousel-arrow:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.carousel-arrow.visible { opacity: 1; pointer-events: auto; }
+.carousel-arrow.left { left: -6px; }
+.carousel-arrow.right { right: -6px; }
+
+/* ─── Chat Messages Area ─── */
+.chat-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0 8px;
+  min-height: 0;
+}
+
+.message-row {
+  display: flex;
+  gap: 12px;
+  max-width: 85%;
+  animation: msgIn 0.35s ease;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-row.user { align-self: flex-end; flex-direction: row-reverse; }
+.message-row.bot { align-self: flex-start; }
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.message-row.bot .msg-avatar { background: var(--accent); color: #fff; }
+.message-row.user .msg-avatar { background: linear-gradient(135deg, #F39C12, #E67E22); color: #fff; }
+
+.msg-bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.message-row.bot .msg-bubble {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+.message-row.user .msg-bubble {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg-bubble p { margin-bottom: 8px; }
+.msg-bubble p:last-child { margin-bottom: 0; }
+.msg-bubble strong { font-weight: 700; }
+.msg-bubble em { font-style: italic; }
+.msg-bubble code {
+  background: rgba(108, 92, 231, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+}
+.msg-bubble pre {
+  background: rgba(0,0,0,0.06);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-size: 13px;
+}
+html.dark .msg-bubble pre { background: rgba(255,255,255,0.06); }
+.msg-bubble ul, .msg-bubble ol {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+.msg-bubble li { margin-bottom: 4px; }
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+.typing-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: typing 1.4s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ─── Chat Input ─── */
+.chat-input-section {
+  padding: 12px 28px 16px;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-light);
+}
+
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 6px 8px 6px 18px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.chat-input-container:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.chat-input-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F39C12, #E67E22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 13px;
+}
+
+.chat-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text-primary);
+  padding: 10px 4px;
+  min-width: 0;
+}
+.chat-input-field::placeholder { color: var(--text-muted); }
+
+.chat-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.input-action-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.15s, color 0.15s;
+}
+.input-action-btn:hover { background: var(--accent-light); color: var(--accent); }
+
+.send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: background 0.2s, transform 0.15s;
+}
+.send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.chat-disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ─── Course Dropdown ─── */
+.course-dropdown-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.course-dropdown-overlay.open { opacity: 1; pointer-events: auto; }
+
+.course-dropdown {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  background: var(--bg-sidebar);
+  border-radius: var(--radius-lg);
+  width: 380px;
+  max-width: 90vw;
+  max-height: 70vh;
+  box-shadow: var(--shadow-lg);
+  z-index: 201;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  display: flex;
+  flex-direction: column;
+}
+.course-dropdown-overlay.open .course-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.course-dropdown-header {
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.course-dropdown-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.course-search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-main);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.course-search::placeholder { color: var(--text-muted); }
+.course-search:focus { border-color: var(--accent); }
+
+.course-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.course-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.course-option:hover { background: var(--accent-light); }
+.course-option.selected { background: var(--accent-light); }
+
+.course-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.course-option-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.course-option.selected .course-option-text { color: var(--accent); }
+
+/* ─── Sidebar Overlay (Mobile) ─── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    transform: translateX(-100%);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+
+  .mobile-menu-btn { display: flex; }
+
+  .content-body { padding: 0 16px 16px; }
+  .chat-input-section { padding: 10px 16px 14px; }
+  .top-bar { padding: 14px 16px; }
+
+  .greeting-section { padding: 24px 0 20px; }
+  .greeting-title { font-size: 26px; }
+  .greeting-wave { font-size: 28px; }
+
+  .action-card { flex: 0 0 165px; min-height: 155px; padding: 16px 14px; }
+  .card-icon { width: 36px; height: 36px; font-size: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 13.5px; }
+  .card-desc { font-size: 12px; }
+
+  .message-row { max-width: 92%; }
+}
+
+@media (max-width: 420px) {
+  .top-bar-course-name { font-size: 13px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ready-badge { font-size: 11px; padding: 5px 10px; }
+}
+
+/* Animation helpers */
+.fade-in { animation: fadeUp 0.5s ease; }
+.stagger-1 { animation-delay: 0.05s; animation-fill-mode: backwards; }
+.stagger-2 { animation-delay: 0.10s; animation-fill-mode: backwards; }
+.stagger-3 { animation-delay: 0.15s; animation-fill-mode: backwards; }
+.stagger-4 { animation-delay: 0.20s; animation-fill-mode: backwards; }
+.stagger-5 { animation-delay: 0.25s; animation-fill-mode: backwards; }
+.stagger-6 { animation-delay: 0.30s; animation-fill-mode: backwards; }
+.stagger-7 { animation-delay: 0.35s; animation-fill-mode: backwards; }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <span class="brand-name">aiRLS</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarClose" aria-label="Close sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <button class="new-chat-btn" id="newChatBtn">
+        <i class="fa-solid fa-plus"></i> New Chat
+      </button>
+      <button class="labs-btn">
+        <i class="fa-solid fa-flask"></i> aiRLS Labs
+      </button>
+
+      <!-- Course Selector -->
+      <div class="course-selector-wrapper">
+        <div class="course-selector" id="courseSelector">
+          <div class="course-selector-label">Your Current Course</div>
+          <div class="course-selector-value">
+            <span id="currentCourseName">Introduction to AI</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section-label">Recent Chats</div>
+      <ul class="chat-history-list" id="chatHistory">
+        <li class="chat-item active">
+          <div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>
+          <span class="chat-item-text">Neural Networks basics</span>
+        </li>
+        <li class="chat-item">
+          <div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>
+          <span class="chat-item-text">Backpropagation explained</span>
+        </li>
+        <li class="chat-item">
+          <div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>
+          <span class="chat-item-text">CNN vs RNN differences</span>
+        </li>
+        <li class="chat-item">
+          <div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>
+          <span class="chat-item-text">Transformer architecture</span>
+        </li>
+        <li class="chat-item">
+          <div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>
+          <span class="chat-item-text">Gradient descent optimization</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-footer-btn"><i class="fa-solid fa-gear"></i> Settings</button>
+      <button class="sidebar-footer-btn"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+    </div>
+  </aside>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main Area -->
+  <main class="main-content">
+    <div class="top-bar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="top-bar-course">
+        <div class="top-bar-course-icon"><i class="fa-solid fa-book-open"></i></div>
+        <span class="top-bar-course-name" id="topBarCourseName">Introduction to AI</span>
+      </div>
+      <div class="top-bar-right">
+        <div class="ready-badge">Ready in 5 min</div>
+      </div>
+    </div>
+
+    <div class="content-body" id="contentBody">
+      <!-- Greeting (shown on home) -->
+      <div id="homeView">
+        <div class="greeting-section">
+          <span class="greeting-wave">👋</span>
+          <h1 class="greeting-title">Hello, Learner!</h1>
+          <p class="greeting-subtitle">I'm your AI study companion. Pick a topic or ask me anything about your course.</p>
+        </div>
+
+        <div class="cards-section">
+          <div class="cards-section-label">Quick Actions</div>
+          <div class="cards-carousel-wrapper">
+            <button class="carousel-arrow left" id="carouselLeft" aria-label="Scroll left">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="cards-carousel" id="cardsCarousel">
+              <div class="action-card fade-in stagger-1" data-prompt="Track my study progress and show me analytics on what I've learned so far.">
+                <div class="card-icon blue"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="card-title">Track Study Progress</div>
+                <div class="card-desc">Visualize your learning journey and identify strengths.</div>
+              </div>
+              <div class="action-card fade-in stagger-2" data-prompt="Show me the digital coursebook for my current course and give me a summary of the next chapter.">
+                <div class="card-icon red"><i class="fa-solid fa-book"></i></div>
+                <div class="card-title">Digital Coursebook</div>
+                <div class="card-desc">Access your interactive course materials instantly.</div>
+              </div>
+              <div class="action-card fade-in stagger-3" data-prompt="Start an exam training session. Quiz me on the key concepts of my course with multiple-choice questions.">
+                <div class="card-icon yellow"><i class="fa-solid fa-pen-to-square"></i></div>
+                <div class="card-title">Exam Trainer</div>
+                <div class="card-desc">Practice with AI-generated questions and feedback.</div>
+              </div>
+              <div class="action-card fade-in stagger-4" data-prompt="Help me find documents and study resources related to my current course topic.">
+                <div class="card-icon pink"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div class="card-title">Find Documents</div>
+                <div class="card-desc">Search for relevant resources and study materials.</div>
+              </div>
+              <div class="action-card fade-in stagger-5" data-prompt="Give me a full course overview with all the main topics, subtopics, and estimated time for each section.">
+                <div class="card-icon teal"><i class="fa-solid fa-sitemap"></i></div>
+                <div class="card-title">Course Overview</div>
+                <div class="card-desc">See the full curriculum and topic structure.</div>
+              </div>
+              <div class="action-card fade-in stagger-6" data-prompt="I'd like to share feedback on my learning experience. What's going well and what could be improved?">
+                <div class="card-icon purple"><i class="fa-solid fa-comment-dots"></i></div>
+                <div class="card-title">Share Feedback</div>
+                <div class="card-desc">Help us improve your learning experience.</div>
+              </div>
+              <div class="action-card fade-in stagger-7" data-prompt="Suggest a new topic for me to study next based on what I've already covered. Explain why it's a good fit.">
+                <div class="card-icon green"><i class="fa-solid fa-seedling"></i></div>
+                <div class="card-title">Study New Topics</div>
+                <div class="card-desc">Discover what to learn next with AI guidance.</div>
+              </div>
+            </div>
+            <button class="carousel-arrow right" id="carouselRight" aria-label="Scroll right">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat messages (shown after first message) -->
+      <div class="chat-messages" id="chatMessages" style="display:none;"></div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-section">
+      <div class="chat-input-container">
+        <div class="chat-input-avatar"><i class="fa-solid fa-user"></i></div>
+        <input
+          type="text"
+          class="chat-input-field"
+          id="chatInput"
+          placeholder="Chat with aiRLS..."
+          autocomplete="off"
+        >
+        <div class="chat-input-actions">
+          <button class="input-action-btn" aria-label="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+          <button class="input-action-btn" aria-label="Voice input"><i class="fa-solid fa-microphone"></i></button>
+          <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+        </div>
+      </div>
+      <div class="chat-disclaimer">aiRLS can make mistakes. Consider checking important information.</div>
+    </div>
+  </main>
+</div>
+
+<!-- Course Dropdown Overlay -->
+<div class="course-dropdown-overlay" id="courseDropdownOverlay">
+  <div class="course-dropdown">
+    <div class="course-dropdown-header">
+      <h3>Select a Course</h3>
+      <input type="text" class="course-search" id="courseSearch" placeholder="Search courses...">
+    </div>
+    <div class="course-list" id="courseList"></div>
+  </div>
+</div>
+
+<!-- Markdown parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.1/marked.min.js"></script>
+
+<script>
+/* ─── Dark Mode Detection ─── */
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.documentElement.classList.add('dark');
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(event) {
+  if (event.matches) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+});
+
+/* ─── State ─── */
+var state = {
+  currentCourse: 'Introduction to AI',
+  isChatMode: false,
+  isLoading: false,
+  messages: [],
+  chatHistoryItems: [
+    { id: 1, title: 'Neural Networks basics', active: true },
+    { id: 2, title: 'Backpropagation explained', active: false },
+    { id: 3, title: 'CNN vs RNN differences', active: false },
+    { id: 4, title: 'Transformer architecture', active: false },
+    { id: 5, title: 'Gradient descent optimization', active: false }
+  ]
+};
+
+var courses = [
+  { name: 'Introduction to AI', icon: 'fa-robot', color: '#6C5CE7' },
+  { name: 'Machine Learning Fundamentals', icon: 'fa-brain', color: '#E74C3C' },
+  { name: 'Data Science with Python', icon: 'fa-python', color: '#3498DB' },
+  { name: 'Natural Language Processing', icon: 'fa-language', color: '#27AE60' },
+  { name: 'Computer Vision', icon: 'fa-eye', color: '#F39C12' },
+  { name: 'Deep Learning', icon: 'fa-layer-group', color: '#E84393' },
+  { name: 'Reinforcement Learning', icon: 'fa-gamepad', color: '#00B894' },
+  { name: 'Statistics & Probability', icon: 'fa-chart-pie', color: '#6C5CE7' },
+  { name: 'Linear Algebra for ML', icon: 'fa-square-root-variable', color: '#D63031' },
+  { name: 'Ethics in AI', icon: 'fa-scale-balanced', color: '#636E72' }
+];
+
+/* ─── DOM refs ─── */
+var sidebar = document.getElementById('sidebar');
+var sidebarOverlay = document.getElementById('sidebarOverlay');
+var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+var sidebarClose = document.getElementById('sidebarClose');
+var newChatBtn = document.getElementById('newChatBtn');
+var courseSelector = document.getElementById('courseSelector');
+var courseDropdownOverlay = document.getElementById('courseDropdownOverlay');
+var courseSearch = document.getElementById('courseSearch');
+var courseList = document.getElementById('courseList');
+var currentCourseName = document.getElementById('currentCourseName');
+var topBarCourseName = document.getElementById('topBarCourseName');
+var cardsCarousel = document.getElementById('cardsCarousel');
+var carouselLeft = document.getElementById('carouselLeft');
+var carouselRight = document.getElementById('carouselRight');
+var chatInput = document.getElementById('chatInput');
+var sendBtn = document.getElementById('sendBtn');
+var homeView = document.getElementById('homeView');
+var chatMessages = document.getElementById('chatMessages');
+
+/* ─── Sidebar toggle (mobile) ─── */
+function openSidebar() {
+  sidebar.classList.add('open');
+  sidebarOverlay.classList.add('open');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+}
+
+mobileMenuBtn.addEventListener('click', openSidebar);
+sidebarClose.addEventListener('click', function() {
+  if (window.innerWidth <= 768) closeSidebar();
+});
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+/* ─── Course Selector ─── */
+function renderCourseList(filter) {
+  var filtered = courses;
+  if (filter) {
+    var q = filter.toLowerCase();
+    filtered = courses.filter(function(c) { return c.name.toLowerCase().indexOf(q) !== -1; });
+  }
+  courseList.innerHTML = filtered.map(function(c) {
+    var selected = c.name === state.currentCourse ? ' selected' : '';
+    return '<div class="course-option' + selected + '" data-course="' + c.name + '">' +
+      '<div class="course-option-icon" style="background:' + c.color + '20; color:' + c.color + '"><i class="fa-solid ' + c.icon + '"></i></div>' +
+      '<span class="course-option-text">' + c.name + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+courseSelector.addEventListener('click', function() {
+  courseDropdownOverlay.classList.add('open');
+  courseSearch.value = '';
+  renderCourseList('');
+  setTimeout(function() { courseSearch.focus(); }, 200);
+});
+
+courseDropdownOverlay.addEventListener('click', function(e) {
+  if (e.target === courseDropdownOverlay) {
+    courseDropdownOverlay.classList.remove('open');
+  }
+});
+
+courseSearch.addEventListener('input', function() {
+  renderCourseList(courseSearch.value);
+});
+
+courseList.addEventListener('click', function(e) {
+  var option = e.target.closest('.course-option');
+  if (!option) return;
+  var name = option.getAttribute('data-course');
+  state.currentCourse = name;
+  currentCourseName.textContent = name;
+  topBarCourseName.textContent = name;
+  courseDropdownOverlay.classList.remove('open');
+  renderCourseList('');
+});
+
+/* ─── Carousel navigation ─── */
+function updateCarouselArrows() {
+  var sl = cardsCarousel.scrollLeft;
+  var maxScroll = cardsCarousel.scrollWidth - cardsCarousel.clientWidth;
+  if (sl > 10) {
+    carouselLeft.classList.add('visible');
+  } else {
+    carouselLeft.classList.remove('visible');
+  }
+  if (sl < maxScroll - 10) {
+    carouselRight.classList.add('visible');
+  } else {
+    carouselRight.classList.remove('visible');
+  }
+}
+
+cardsCarousel.addEventListener('scroll', updateCarouselArrows);
+window.addEventListener('resize', updateCarouselArrows);
+setTimeout(updateCarouselArrows, 100);
+
+carouselLeft.addEventListener('click', function() {
+  cardsCarousel.scrollBy({ left: -220, behavior: 'smooth' });
+});
+carouselRight.addEventListener('click', function() {
+  cardsCarousel.scrollBy({ left: 220, behavior: 'smooth' });
+});
+
+/* ─── Action Card clicks ─── */
+document.querySelectorAll('.action-card').forEach(function(card) {
+  card.addEventListener('click', function() {
+    var prompt = card.getAttribute('data-prompt');
+    if (prompt) {
+      chatInput.value = prompt;
+      sendBtn.disabled = false;
+      sendMessage();
+    }
+  });
+});
+
+/* ─── Chat History Clicks ─── */
+document.getElementById('chatHistory').addEventListener('click', function(e) {
+  var item = e.target.closest('.chat-item');
+  if (!item) return;
+  document.querySelectorAll('.chat-item').forEach(function(el) { el.classList.remove('active'); });
+  item.classList.add('active');
+});
+
+/* ─── New Chat ─── */
+newChatBtn.addEventListener('click', function() {
+  state.messages = [];
+  state.isChatMode = false;
+  chatMessages.innerHTML = '';
+  chatMessages.style.display = 'none';
+  homeView.style.display = '';
+  chatInput.value = '';
+  sendBtn.disabled = true;
+  if (window.innerWidth <= 768) closeSidebar();
+});
+
+/* ─── Chat Input ─── */
+chatInput.addEventListener('input', function() {
+  sendBtn.disabled = chatInput.value.trim().length === 0;
+});
+
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey && chatInput.value.trim()) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+sendBtn.addEventListener('click', function() {
+  if (chatInput.value.trim()) sendMessage();
+});
+
+/* ─── Marked config ─── */
+if (typeof marked !== 'undefined') {
+  marked.setOptions({
+    breaks: true,
+    gfm: true
+  });
+}
+
+function renderMarkdown(text) {
+  if (typeof marked !== 'undefined') {
+    return marked.parse(text);
+  }
+  return text.replace(/\n/g, '<br>');
+}
+
+/* ─── Send Message ─── */
+function sendMessage() {
+  var text = chatInput.value.trim();
+  if (!text || state.isLoading) return;
+
+  /* Switch to chat mode */
+  if (!state.isChatMode) {
+    state.isChatMode = true;
+    homeView.style.display = 'none';
+    chatMessages.style.display = 'flex';
+  }
+
+  /* Add user message */
+  state.messages.push({ role: 'user', content: text });
+  appendMessage('user', text);
+
+  chatInput.value = '';
+  sendBtn.disabled = true;
+  state.isLoading = true;
+
+  /* Add bot typing */
+  var typingEl = appendTyping();
+
+  /* Add to chat history */
+  var preview = text.length > 30 ? text.substring(0, 30) + '...' : text;
+  addChatHistoryItem(preview);
+
+  /* Scroll to bottom */
+  scrollToBottom();
+
+  /* Register handler & send */
+  var handlerName = 'chat-' + Date.now();
+
+  window.Poe.registerHandler(handlerName, function(result) {
+    var msg = result.responses[0];
+
+    if (msg.status === 'error') {
+      if (typingEl && typingEl.parentNode) typingEl.remove();
+      appendMessage('bot', 'Sorry, something went wrong. Please try again.');
+      state.isLoading = false;
+      scrollToBottom();
+      return;
+    }
+
+    if (msg.status === 'incomplete') {
+      if (typingEl && typingEl.parentNode) typingEl.remove();
+      typingEl = null;
+      updateOrCreateBotMessage(handlerName, msg.content, false);
+      scrollToBottom();
+    }
+
+    if (msg.status === 'complete') {
+      if (typingEl && typingEl.parentNode) typingEl.remove();
+      typingEl = null;
+      updateOrCreateBotMessage(handlerName, msg.content, true);
+      state.messages.push({ role: 'bot', content: msg.content });
+      state.isLoading = false;
+      scrollToBottom();
+    }
+  });
+
+  var systemCtx = 'You are aiRLS, an AI learning assistant. The student is currently studying "' +
+    state.currentCourse + '". Be helpful, encouraging, and concise. Use markdown formatting where appropriate.';
+
+  window.Poe.sendUserMessage(
+    '@Claude-Sonnet-4.5 ' + systemCtx + '\n\nStudent: ' + text,
+    {
+      handler: handlerName,
+      stream: true,
+      openChat: false,
+      parameters: {}
+    }
+  ).catch(function(err) {
+    if (typingEl && typingEl.parentNode) typingEl.remove();
+    appendMessage('bot', 'Could not send message. Please try again.');
+    state.isLoading = false;
+    scrollToBottom();
+  });
+}
+
+/* ─── DOM Helpers ─── */
+function appendMessage(role, content) {
+  var row = document.createElement('div');
+  row.className = 'message-row ' + role;
+
+  var avatarIcon = role === 'bot' ? 'fa-graduation-cap' : 'fa-user';
+
+  var rendered = role === 'bot' ? renderMarkdown(content) : escapeHtml(content);
+
+  row.innerHTML =
+    '<div class="msg-avatar"><i class="fa-solid ' + avatarIcon + '"></i></div>' +
+    '<div class="msg-bubble">' + rendered + '</div>';
+
+  chatMessages.appendChild(row);
+  return row;
+}
+
+function appendTyping() {
+  var row = document.createElement('div');
+  row.className = 'message-row bot';
+  row.id = 'typingIndicator';
+  row.innerHTML =
+    '<div class="msg-avatar"><i class="fa-solid fa-graduation-cap"></i></div>' +
+    '<div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  chatMessages.appendChild(row);
+  return row;
+}
+
+function updateOrCreateBotMessage(handlerId, content, isFinal) {
+  var msgId = 'bot-msg-' + handlerId;
+  var existing = document.getElementById(msgId);
+
+  if (!existing) {
+    existing = document.createElement('div');
+    existing.className = 'message-row bot';
+    existing.id = msgId;
+    existing.innerHTML =
+      '<div class="msg-avatar"><i class="fa-solid fa-graduation-cap"></i></div>' +
+      '<div class="msg-bubble"></div>';
+    chatMessages.appendChild(existing);
+  }
+
+  var bubble = existing.querySelector('.msg-bubble');
+  bubble.innerHTML = renderMarkdown(content);
+}
+
+function scrollToBottom() {
+  var body = document.getElementById('contentBody');
+  requestAnimationFrame(function() {
+    body.scrollTop = body.scrollHeight;
+  });
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+function addChatHistoryItem(title) {
+  var historyList = document.getElementById('chatHistory');
+  /* Deactivate all */
+  historyList.querySelectorAll('.chat-item').forEach(function(el) { el.classList.remove('active'); });
+
+  var li = document.createElement('li');
+  li.className = 'chat-item active';
+  li.innerHTML =
+    '<div class="chat-item-icon"><i class="fa-solid fa-message"></i></div>' +
+    '<span class="chat-item-text">' + escapeHtml(title) + '</span>';
+  historyList.insertBefore(li, historyList.firstChild);
+}
+
+/* ─── Init ─── */
+renderCourseList('');
+</script>
+
+</body>
+</html>
